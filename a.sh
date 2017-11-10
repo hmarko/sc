@@ -1,6 +1,6 @@
 #!/bin/bash
 # SCRIPT  : snapcreator menu
-# PURPOSE : A menu driven Shell script using dialog utility
+# PURPOSE : A menu driven Shell script using dialog utility to launch snapcreator
 #
 
 ##############################################################################
