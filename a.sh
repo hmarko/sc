@@ -29,23 +29,26 @@ scRemoveClone="${scpath}SnapCreatorUmountClone.bat"
 
 $sshsnapcreator $scGetProfiles > /tmp/profileinfo.$$
 awk '/Profile:/ {print $1;}' /tmp/profileinfo.$$ | awk 'BEGIN{FS=":"}{print $2;}' > /tmp/profiles.$$
+
+profiles=''
+i=0
 while read line 
 do
 	grep "Profile:${line} Configs" /tmp/profileinfo.$$ | awk 'BEGIN{FS=":"}  {print $3;}' | tr " " "\n" > /tmp/configs_${line}.$$
+	((i+=1))
+	profiles+="${i} "
+	profiles+="${line} "
 done </tmp/profiles.$$
-
-exit
 
 # Dialog utility to display options list
 
+echo $profiles
+
 while :
 do
+    declare -a profiles
     dialog --clear --backtitle "NetApp SnapCreator Managment" --title "MAIN MENU" \
-    --menu "Use [UP/DOWN] key to seclect profile" 12 60 6 \
-    "PROD" "Production DB" \
-    "TEST" "Test DBi and Production Replication" \
-    "EXIT" "TO EXIT" 2> /tmp/menuchoices.$$
-
+    --menu "Use [UP/DOWN] key to select profile" 12 60 6 `echo ${profiles}`  2> /tmp/menuchoices.$$
 
     retopt=$?
     choice=`cat /tmp/menuchoices.$$`
