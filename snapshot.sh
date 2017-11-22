@@ -27,30 +27,72 @@ scGetProfiles="${scpath}SnapCreatorGetProfiles.bat"
 scSnapmirror="${scpath}SnapCreatorSnapmirror.bat"
 scSnapshot="${scpath}SnapCreatorSnapshotList.bat"
 scRemoveClone="${scpath}SnapCreatorUmountClone.bat"
+scExportProfile="${scpath}SnapCreatorExportProfile.bat"
 
+
+list_snapshots()
+{
+	dialog --title "Please enter snapshot " \
+	--backtitle "you can use * for query (*daily* will list all snapshots countataining the word daily)" \
+	--inputbox "Enter your name " 8 60 "*" 2>/tmp/menuchoices.$$
+	snap=`cat /tmp/menuchoices.$$`
+	clear
+	${sshsnapcreator} ${scSnapshot} ${profile} ${config} ${snap} 
+	read -r -p "Press enter to continue " response 
+}
+
+create_backup() 
+{
+	${sshsnapcreator} ${scExportProfile} ${profile} ${config} > /tmp/configfile_${profile}_${config}.$$
+	policies=`cat /tmp/configfile_${profile}_${config}.$$ | grep '^NTAP_SNAPSHOT_POLICIES=' | awk  'BEGIN{FS="="}  {print $2;}'| sed -e 's/\r//g'`
+	#check if snapshot policies or retentions are used
+	if ! [[ -z "$policies" ]]
+	then
+		IFS=',' read -r -a policiesarr <<< "$policies"
+	else
+		policies=`cat /tmp/configfile_${profile}_${config}.$$ | grep '^NTAP_SNAPSHOT_RETENTIONS=' | awk  'BEGIN{FS="="}  {print $2;}'|sed -e 's/\r//g'|sed -e 's/\:[0-9]\+//g'`;
+		IFS=',' read -r -a policiesarr <<< "$policies";
+	fi
+	
+	policiesmenuitems=''
+	for p in "${policiesarr[@]}"
+	do
+        	policiesmenuitems+="${p} "
+        	policiesmenuitems+="${p} "
+	done 
+
+	while :
+	do
+		dialog --backtitle "NetApp SnapCreator Managment" --title "Policies for Profile:${profile} Config:${config}" \
+			--menu "Use [UP/DOWN] key to select config for Profile:${profile}" 12 70 8 `echo ${policiesmenuitems}` 2> /tmp/menuchoices.$$
+		retopt=$?
+		choice=`cat /tmp/menuchoices.$$`
+		case $retopt in
+			0)policy=${choice};clear; ${sshsnapcreator} ${scBackup} ${profile} ${config} ${policy}; read -r -p "Press enter to continue " response ;break;;
+			*)clear ; break ;;
+		esac
+	done		
+		
+}
 show_options() 
 {
         while :
         do
                 dialog --clear --backtitle "NetApp SnapCreator Managment" --title "Options" \
                         --menu "Use [UP/DOWN] key to select option for Profile:${profile} Config:${config}" 13 70 8 \
-			"1" "Daily Snapshot" \
-			"2" "Weekly Snapshot" \
-			"3" "Manual Snapshot - This snashot will remain until it will be deleted" \
-			"4" "Snapmirror Update" \
-			"5" "Create Clone" \
-			"6" "List Snapshots" 2> /tmp/menuchoices.$$
+							"1" "Backup" \
+							"2" "Snapmirror Update" \
+							"3" "List Snapshots" \
+							"4" "Create Clone" 2> /tmp/menuchoices.$$
                 retopt=$?
                 choice=`cat /tmp/menuchoices.$$`
 
                 case $retopt in
                      0)case $choice in
-						1) clear; ${sshsnapcreator} ${scBackup} ${profile} ${config} daily; exit $?;;
-						2) clear; ${sshsnapcreator} ${scBackup} ${profile} ${config} weekly; exit $?;;
-						3) clear; ${sshsnapcreator} ${scBackup} ${profile} ${config} manual; exit $?;;
-						4) clear; ${sshsnapcreator} ${scSnapmirror} ${profile} ${config} manual; exit $?;;
-						5) create_clone;;
-						6) list_snapshots;;
+						1) create_backup;;
+						2) clear; ${sshsnapcreator} ${scSnapmirror} ${profile} ${config};read -r -p "Press enter to continue " response ;;
+						3) list_snapshots;;
+						4) create_clone;;
 					esac ;;
 					*)clear ; break ;;
                 esac
