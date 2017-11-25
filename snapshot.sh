@@ -28,16 +28,41 @@ scSnapmirror="${scpath}SnapCreatorSnapmirror.bat"
 scSnapshot="${scpath}SnapCreatorSnapshotList.bat"
 scRemoveClone="${scpath}SnapCreatorUmountClone.bat"
 scExportProfile="${scpath}SnapCreatorExportProfile.bat"
+scListClones="${scpath}SnapCreatorListClones.bat"
 
+create_clone ()
+{
+	$snapshot ='*'
+	dialog --ok-label "Create Clone" \
+          --backtitle "Snapcreator create clone" \
+          --title "Create Clone" \
+          --form "Create Clone" 10 80 0 \
+        "Clone Name:  " 1 1 "$clone" 1 15 20 0 \
+        "Snapshot:"    2 1 "$snapshot"  2 17 25 0 \
+        "NFS Hosts (Seperated by :):" 3 1 "$nfshosts"   3 30 35 0 \
+2>/tmp/out
+
+}
 
 list_snapshots()
 {
-	dialog --title "Please enter snapshot " \
-	--backtitle "you can use * for query (*daily* will list all snapshots countataining the word daily)" \
-	--inputbox "Enter your name " 8 60 "*" 2>/tmp/menuchoices.$$
+	dialog --title "Create clone " \
+	--backtitle "you can use * for query (*daily* will list all snapshots countataining the word daily)"  \
+	--inputbox "You can use * for query (*daily* will list all snapshots countataining the word daily) " 8 60 "*" 2>/tmp/menuchoices.$$
 	snap=`cat /tmp/menuchoices.$$`
 	clear
-	${sshsnapcreator} ${scSnapshot} ${profile} ${config} ${snap} 
+	${sshsnapcreator} ${scSnapshot} ${profile} ${config} "${snap}"
+	read -r -p "Press enter to continue " response 
+}
+
+list_snapshots()
+{
+	dialog --title "List snapshots " \
+	--backtitle "you can use * for query (*daily* will list all snapshots countataining the word daily)"  \
+	--inputbox "You can use * for query (*daily* will list all snapshots countataining the word daily) " 8 60 "*" 2>/tmp/menuchoices.$$
+	snap=`cat /tmp/menuchoices.$$`
+	clear
+	${sshsnapcreator} ${scSnapshot} ${profile} ${config} "${snap}"
 	read -r -p "Press enter to continue " response 
 }
 
@@ -83,7 +108,9 @@ show_options()
 							"1" "Backup" \
 							"2" "Snapmirror Update" \
 							"3" "List Snapshots" \
-							"4" "Create Clone" 2> /tmp/menuchoices.$$
+							"4" "Create Clone" \
+							"5" "List CLones" \
+							"6" "Unmount Clone" 2> /tmp/menuchoices.$$
                 retopt=$?
                 choice=`cat /tmp/menuchoices.$$`
 
@@ -93,6 +120,8 @@ show_options()
 						2) clear; ${sshsnapcreator} ${scSnapmirror} ${profile} ${config};read -r -p "Press enter to continue " response ;;
 						3) list_snapshots;;
 						4) create_clone;;
+						5) clear; ${sshsnapcreator} ${scListClones} ${profile} ${config};read -r -p "Press enter to continue " response ;;
+						6) unmount_clone;;
 					esac ;;
 					*)clear ; break ;;
                 esac
