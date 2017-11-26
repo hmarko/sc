@@ -32,15 +32,31 @@ scListClones="${scpath}SnapCreatorListClones.bat"
 
 create_clone ()
 {
-	$snapshot ='*'
+	snapshot='*'
 	dialog --ok-label "Create Clone" \
           --backtitle "Snapcreator create clone" \
           --title "Create Clone" \
-          --form "Create Clone" 10 80 0 \
-        "Clone Name:  " 1 1 "$clone" 1 15 20 0 \
-        "Snapshot:"    2 1 "$snapshot"  2 17 25 0 \
-        "NFS Hosts (Seperated by :):" 3 1 "$nfshosts"   3 30 35 0 \
-2>/tmp/out
+          --form "Create Clone" 10 85 0 \
+        "Snapshot (query with multiple answers wil pick the newest):" 1 1 "${snapshot}"  1 52 25 0 \
+		"Clone Name:  " 2 1 "${clone}" 2 15 20 0 \
+        "NFS Hosts (Seperated by :):" 3 1 "${nfshosts}" 3 30 35 0  2>/tmp/menuchoices.$$
+	
+	cloneparams=''
+	while read line 
+	do
+		cloneparams+="\"${line}\" "
+	done </tmp/menuchoices.$$		
+	
+	dialog --title "split clone from parent" \
+	--backtitle "Snapcreator create clone" \
+	--yesno "Do you want to split clone from parent ?" 7 60	
+	response=$?
+	case $response in
+	   1) split='N';;
+	   0) split='Y';;
+	esac	
+	clear;
+	${sshsnapcreator} ${scClone} ${profile} ${config} ${cloneparams} ${split}
 
 }
 
