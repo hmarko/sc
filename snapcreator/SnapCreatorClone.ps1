@@ -85,7 +85,7 @@ $vols | Foreach-Object {
 	}
 
 
-	$snaps = Get-NcSnapshot -Volume $vol -SnapName $snapshot | Sort-Object -Descending:$true Created
+	$snaps = Get-NcSnapshot -Volume $vol -SnapName $snapshot | ?{$_.Dependency -ne 'snapmirror'} | Sort-Object -Descending:$true Created
 	if (@($snaps).Count -lt 1) {
 		Write-Log "ERROR: snapshot $snapshot does not exists on $($svm):$($vol)"
 		$host.SetShouldExit(1) 
