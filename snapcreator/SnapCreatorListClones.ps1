@@ -87,8 +87,10 @@ $vols | Foreach-Object {
 						$volprofile = $value
 					}			
 				}
+				
 				if ($volprofile  -eq $profile -and $volconfig -eq $config -and $volparentname -eq $vol) {
-					Write-Log "`tclone:$($currvol.Name) base snapshot:$volsnap Split:$($volsplit)" 1
+					$prefix = $($currvol.Name).substring(0,$($currvol.Name).Length-$volparentname.Length)
+					Write-Log "`tClone Prefix:$($prefix) Clone Volume:$($currvol.Name) Base Snapshot:$volsnap Split:$($volsplit)" 1
 				}
 				
 			}
