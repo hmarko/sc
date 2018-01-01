@@ -38,7 +38,7 @@ $snapcreator = Connect-ScServer -Name $scserver -Port $scport -Credential $sccre
 if (!$snapcreator) {
 	Write-Log "ERROR:could not connect to snapcreator server"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 if ($split.ToLower() -eq 'yes' -or $split.ToLower() -eq 'y') {
@@ -50,7 +50,7 @@ $v = Get-ScVolume -ProfileName $profile -ConfigName $config -OutVariable vols
 if (-not @($vols).Count) {
 	Write-Log "ERROR: at least one volume should be set in the SnapCreator configuration"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 
@@ -64,7 +64,7 @@ $vols | Foreach-Object {
 	if ($svm -and $_.Storage -ne $svm) {
 		Write-Log "ERROR: only one SVM is supported for cloning (in the configuration there is at least 2: $($svm) and $($_.Storage)"
 		$host.SetShouldExit(1) 
-		exit		
+		exit 1		
 	}
 	
 	$svm = $_.Storage 
@@ -81,7 +81,7 @@ $vols | Foreach-Object {
 	if ($volumedetails) {
 		Write-Log "ERROR:clone already exists $($svm):$($fullclonename)"
 		$host.SetShouldExit(1) 
-		exit
+		exit 1
 	}
 
 
@@ -89,7 +89,7 @@ $vols | Foreach-Object {
 	if (@($snaps).Count -lt 1) {
 		Write-Log "ERROR: snapshot $snapshot does not exists on $($svm):$($vol)"
 		$host.SetShouldExit(1) 
-		exit
+		exit 1
 	} elseif (@($snaps).Count -gt 1) {
 		$snap1 = $snaps[0].Name
 		Write-Log "more than one snapshot ($($snaps.Count)) found on $($svm):$($vol) using $snap1 which is the newest one"
@@ -101,13 +101,13 @@ $vols | Foreach-Object {
 	if ($snap -and $snap1 -ne $snap) {
 		Write-Log "ERROR: snapshot $snap does not exists on $($svm):$($vol)"
 		$host.SetShouldExit(1) 
-		exit	
+		exit 1	
 	}
 	$snap = $snap1
 	if (-not $snap) {
 		Write-Log "ERROR:requested snapshot $snapshot name was not found on $($svm):$($vol)"
 		$host.SetShouldExit(1) 
-		exit	
+		exit 1
 	}
 	$snapshot = $snap
 }
@@ -131,7 +131,7 @@ $vols | Foreach-Object {
 	if ($exitcode -ne $True) {
 		Write-Log "ERROR:snapcreator job failed, please check the logs"
 		$host.SetShouldExit(1) 
-		exit
+		exit 1
 	} else {
 		Write-Log "waiting for snapcreator job ($($scwf.workflowId)) to complete"
 		Wait-ScWorkflow -InputObject $scwf -Server $scconn
@@ -147,7 +147,7 @@ $vols | Foreach-Object {
 			}
 			Write-Log "detailed debug log is available on sc server ($scserver):$debuglog"
 			$host.SetShouldExit(1) 
-			exit
+			exit 1
 		}
 		Write-Log "detailed debug log is available on: $debuglog (on $scserver)"
 	}

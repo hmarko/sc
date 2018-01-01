@@ -26,7 +26,7 @@ $snapcreator = Connect-ScServer -Name $scserver -Port $scport -Credential $sccre
 if (!$snapcreator) {
 	Write-Log "ERROR:could not connect to snapcreator server"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 $v = Get-ScVolume -ProfileName $profile -ConfigName $config -OutVariable vols
@@ -34,7 +34,7 @@ $v = Get-ScVolume -ProfileName $profile -ConfigName $config -OutVariable vols
 if (-not @($vols).Count) {
 	Write-Log "ERROR: at least one volume should be set in the SnapCreator configuration"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 $v = Get-ScVolume -ProfileName $profile -ConfigName $config -OutVariable vols
@@ -42,7 +42,7 @@ $vols | Foreach-Object {
 	if ($svm -and $_.Storage -ne $svm) {
 		Write-Log "ERROR: only one SVM is supported for cloning (in the configuration there is at least 2: $($svm) and $($_.Storage)"
 		$host.SetShouldExit(1) 
-		exit		
+		exit 1
 	}
 	
 	$svm = $_.Storage 
@@ -57,7 +57,7 @@ $vols | Foreach-Object {
 	if (!$volumedetails) {
 		Write-Log "ERROR:volume $($svm):$($vol) does not exist"
 		$host.SetShouldExit(1) 
-		exit
+		exit 1
 	}
 	if (!$snapshot) {
 		$snapshot = '*'

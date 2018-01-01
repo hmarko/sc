@@ -33,7 +33,7 @@ $snapcreator = Connect-ScServer -Name $scserver -Port $scport -Credential $sccre
 if (!$snapcreator) {
 	Write-Log "ERROR:could not connect to snapcreator server"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 $v = Get-ScVolume -ProfileName $profile -ConfigName $config -OutVariable vols
@@ -41,7 +41,7 @@ $v = Get-ScVolume -ProfileName $profile -ConfigName $config -OutVariable vols
 if (-not @($vols).Count) {
 	Write-Log "ERROR: at least one volume should be set in the SnapCreator configuration"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 $conn = $false
@@ -70,7 +70,7 @@ $vols | Foreach-Object {
 	if (!$clonedetails) {
 		Write-Log "ERROR:could not locate clone volume $($svm):$($fullclonename)"
 		$host.SetShouldExit(1) 
-		exit
+		exit 1
 	}
 
 	$volcomment = $clonedetails.VolumeIdAttributes.Comment
@@ -88,7 +88,7 @@ $vols | Foreach-Object {
 	if (!$snapshot -or !$origclonename) {
 		Write-Log "ERROR:could not find required information on $($svm):$($fullclonename) comment field"
 		$host.SetShouldExit(1) 
-		exit
+		exit 1
 	}
 
 	$clonesnapshot = $snapshot
@@ -110,7 +110,7 @@ $vols | Foreach-Object {
 	if ($clonedetails.VolumeCloneAttributes.CloneChildCount -gt 0) {
 		Write-Log "ERROR: clone:$($fullclonename) cannot be destroyed since it is the father of $($clonedetails.VolumeCloneAttributes.CloneChildCount) clones"
 		$host.SetShouldExit(1) 
-		exit	
+		exit 1
 	}
 
 	Write-Log "invoking snapcreator clone un-mount for profile:$profile config:$config snapshot:$snapshot snapcreator clone:$fullclonename original clone:$origclonename "
@@ -123,7 +123,7 @@ $vols | Foreach-Object {
 	if ($exitcode -ne $True) {
 		Write-Log "ERROR:snapcreator job failed, please check the logs"
 		$host.SetShouldExit(1) 
-		exit
+		exit 1
 	} else {
 		Write-Log "waiting for snapcreator job ($($scwf.workflowId)) to complete"
 		Wait-ScWorkflow -InputObject $scwf -Server $scconn
@@ -139,7 +139,7 @@ $vols | Foreach-Object {
 			}
 			Write-Log "detailed debug log is available on sc server ($scserver):$debuglog"
 			$host.SetShouldExit(1) 
-			exit
+			exit 1
 		}
 		Write-Log "detailed debug log is available on: $debuglog (on $scserver)"
 	}

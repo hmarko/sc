@@ -21,7 +21,7 @@ $GlobalFile = $PSScriptRoot+'\SCGlobalConfig.ps1'
 if (!([System.IO.File]::Exists($GlobalFile))) {
 	Write-Host "ERROR: failed to locate required file $($PSScriptRoot)\GlobalConfig.ps1" 
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 . $GlobalFile
 
@@ -30,7 +30,7 @@ $snapcreator = Connect-ScServer -Name $scserver -Port $scport -Credential $sccre
 if (!$snapcreator) {
 	Write-Log "ERROR:could not connect to snapcreator server"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 Write-Log "invoking snapcreator backup for profile:$profile config:$config policy:$policy"
@@ -38,7 +38,7 @@ $scwf = Start-ScWorkflow -Action backup -ProfileName $profile -ConfigName $confi
 if ($err) {
 	Write-Log "ERROR:snapcreator job failed, please check the logs"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 } else {
 	Write-Log "waiting for snapcreator job ($($scwf.workflowId)) to complete"
 	Wait-ScWorkflow -InputObject $scwf -Server $scconn
@@ -54,7 +54,7 @@ if ($err) {
 		}
 		Write-Log "detailed debug log is available on sc server ($scserver):$debuglog"
 		$host.SetShouldExit(1) 
-		exit
+		exit 1
 	}
 	Write-Log "detailed debug log is available on: $debuglog (on $scserver)"
 	$host.SetShouldExit(0)

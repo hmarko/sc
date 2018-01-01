@@ -12,7 +12,7 @@ $snapcreator = Connect-ScServer -Name $scserver -Port $scport -Credential $sccre
 if (!$snapcreator) {
 	Write-Log "ERROR:could not connect to snapcreator server"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 $p = Get-ScProfile -OutVariable profiles
@@ -20,7 +20,7 @@ $p = Get-ScProfile -OutVariable profiles
 if (-not @($profiles).Count) {
 	Write-Log "ERROR: at least one profile should be set in the SnapCreator configuration"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 $profiles | Foreach-Object {

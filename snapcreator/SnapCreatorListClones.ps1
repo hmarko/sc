@@ -12,7 +12,7 @@ $GlobalFile = $PSScriptRoot+'\SCGlobalConfig.ps1'
 if (!([System.IO.File]::Exists($GlobalFile))) {
 	Write-Host "ERROR: failed to locate required file $($PSScriptRoot)\GlobalConfig.ps1" 
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 . $GlobalFile
 
@@ -21,7 +21,7 @@ $snapcreator = Connect-ScServer -Name $scserver -Port $scport -Credential $sccre
 if (!$snapcreator) {
 	Write-Log "ERROR:could not connect to snapcreator server"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 $v = Get-ScVolume -ProfileName $profile -ConfigName $config -OutVariable vols
@@ -29,7 +29,7 @@ $v = Get-ScVolume -ProfileName $profile -ConfigName $config -OutVariable vols
 if (-not @($vols).Count) {
 	Write-Log "ERROR: at least one volume should be set in the SnapCreator configuration"
 	$host.SetShouldExit(1) 
-	exit
+	exit 1
 }
 
 $conn = $false
@@ -42,7 +42,7 @@ $vols | Foreach-Object {
 	if ($svm -and $_.Storage -ne $svm) {
 		Write-Log "ERROR: only one SVM is supported for cloning (in the configuration there is at least 2: $($svm) and $($_.Storage)"
 		$host.SetShouldExit(1) 
-		exit		
+		exit 1	
 	}
 	$svm = $_.Storage 
 	$vol = $_.Name
