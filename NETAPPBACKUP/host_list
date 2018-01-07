@@ -1,0 +1,9 @@
+ ping -c 1 tlvedapp1 |grep time=
+ ping -c 1 tlvedapp2 |grep time=
+ ping -c 1 tlveddb1 |grep time=
+ ping -c 1 tlveddb2 |grep time=
+ ping -c 1 tlveddb3 |grep time=
+ ping -c 1 tlvetapp1 |grep time=
+ ping -c 1 tlvetapp2 |grep time=
+ ping -c 1 tlvetdb1 |grep time=
+ ping -c 1 tlvetdb2 |grep time=
