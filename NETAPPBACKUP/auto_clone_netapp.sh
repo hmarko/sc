@@ -1,8 +1,7 @@
 #!/bin/bash
-#Script for automatic clone PROD env.
+#Script for automatic backup,clone,replicate  PROD env.
 #Set variable
 #Updated by Haim Marko hmarko@netapp.com to support NetApp cDOT integration and SnapCreator
-
 
 #snapcreator server configuration
 NAS_USER=DEMO\\administrator
@@ -39,48 +38,164 @@ REDOLOG="redolog:redolog_rep"
 SRV="server_4"
 
 case "$1" in
-       FRZ) APPHOST1="tlvda2"
-            ENV="VERFRZ"
-            DBHOST1="tlveddb3"
-            APPUSER="appfrz"
-            DBUSER="orafrz"
-            ENV_DIR="/verfrz"
-            VOLLIST="data orahome logout redolog"
- 	        PROCLIST_RED=" ora_smon_VERFRZ "
-            PROCLIST_YELLOW=" tnslsnr VERFRZ"
-	        RETAINDSTSNAP=1
-            #NFS IP, when multiple IP separate by colon (:). ex: 1.1.1.1:2.2.2.2:3.3.3.3
-			IPAPPHOST="10.61.228.109"
-            IPDBHOST="10.61.228.103"
-			#BACKUPMOD should be Y if we need to put the DB in HOT backup mode. If not a crash consistent snapshot will be taken
-			BACKUP_MODE="Y"
-			SC_PROD_PROFILE="PROD"
-			SC_PROD_CONFIG="prod"
-			SC_POLICY="Daily"
-			#SC_PROD_CREATE_SNAPSHOT should by Y to create snapshot. if not Y clone will be based on the latest exists snapshot
-			SC_PROD_CREATE_SNAPSHOT="Y"
-			#SC_PROD_UPDATE_MIRROR should by Y to update mirror from prod to CLONE 
-			SC_PROD_UPDATE_MIRROR="Y"
-			SC_CLONE_PROFILE="TEST"
-			SC_CLONE_CONFIG="prod_rep"
-			#if SC_CLONE_UNMOUNT is Y previous clone will be destroyed prior clone creation 
-			SC_CLONE_UNMOUNT="Y"
-			SC_CLONE_NAME="FRZ_"
-			SC_CLONE_SNAPSHOT="*Daily*"
-			SC_CLONE_CLONE_SPLIT="Y"
-            ;;
-
-       *) /bin/echo "Please specify existing ENV. "
-            exit
-           ;;
+	FRZ) APPHOST1="tlvda2"
+		ENV="VERFRZ"
+		DBHOST1="tlveddb3"
+		APPUSER="appfrz"
+		DBUSER="orafrz"
+		ENV_DIR="/verfrz"
+		VOLLIST="data orahome logout redolog"
+		PROCLIST_RED=" ora_smon_VERFRZ "
+		PROCLIST_YELLOW=" tnslsnr VERFRZ"
+		#NFS IP, when multiple IP separate by colon (:). ex: 1.1.1.1:2.2.2.2:3.3.3.3
+		IPAPPHOST="10.61.228.109"
+		IPDBHOST="10.61.228.103"
+		SC_PROFILE="PROD"
+		SC_CONFIG="prod"
+		SC_POLICY="Daily"		
+		#SC_CREATE_SNAPSHOT should by Y to create snapshot. if not Y clone will be based on the latest exists snapshot
+		SC_CREATE_SNAPSHOT="Y"
+		#BACKUPMODE should be Y if we need to put the PRODUCTION DB in HOT backup mode before taking a snapshot otherwise crash consistent snapshot will be taken
+		BACKUP_MODE="Y"		
+		#SC_PROD_UPDATE_MIRROR should by Y to update mirror from prod to CLONE 
+		SC_PROD_UPDATE_MIRROR="Y"
+		SC_CLONE_PROFILE="TEST"
+		SC_CLONE_CONFIG="prod_rep"
+		#if SC_CLONE_UNMOUNT is Y previous clone will be destroyed prior clone creation 
+		SC_CLONE_UNMOUNT="Y"
+		#if SC_CLONE_CREATE is Y clone will be created  
+		SC_CLONE_CREATE="Y"
+		SC_CLONE_NAME="FRZ_"
+		SC_CLONE_SNAPSHOT="*Daily*"
+		SC_CLONE_CLONE_SPLIT="N"
+		;;
+	BACKUP) APPHOST1="tlvda2"
+		ENV="VERFRZ"
+		DBHOST1="tlveddb3"
+		APPUSER="appfrz"
+		DBUSER="orafrz"
+		ENV_DIR="/verfrz"
+		VOLLIST="data orahome logout redolog"
+		PROCLIST_RED=" ora_smon_VERFRZ "
+		PROCLIST_YELLOW=" tnslsnr VERFRZ"
+		#NFS IP, when multiple IP separate by colon (:). ex: 1.1.1.1:2.2.2.2:3.3.3.3
+		IPAPPHOST="10.61.228.109"
+		IPDBHOST="10.61.228.103"
+		SC_PROFILE="PROD"
+		SC_CONFIG="prod"
+		SC_POLICY="Backup"		
+		#SC_CREATE_SNAPSHOT should by Y to create snapshot. if not Y clone will be based on the latest exists snapshot
+		SC_CREATE_SNAPSHOT="Y"
+		#BACKUPMODE should be Y if we need to put the PRODUCTION DB in HOT backup mode before taking a snapshot otherwise crash consistent snapshot will be taken
+		BACKUP_MODE="Y"			
+		#SC_PROD_UPDATE_MIRROR should by Y to update mirror from prod to CLONE 
+		SC_PROD_UPDATE_MIRROR="Y"
+		;;
+		
+	DEV)APPHOST1="tlvda4"
+		ENV="DEV"
+		DBHOST1="tlveddb4"
+		APPUSER="appdev"
+		DBUSER="oradev"
+		ENV_DIR="/devl"
+		PROCLIST_RED=" ora_smon_DEV "
+		PROCLIST_YELLOW=" tnslsnr DEV"
+		VOLLIST="data logout redolog orahome"
+		APPHOST="10.61.228.111"
+		IPDBHOST="10.61.228.136"
+		SC_PROFILE="PROD"
+		SC_CONFIG="prod"
+		SC_POLICY="Daily"		
+		#SC_CREATE_SNAPSHOT should by Y to create snapshot. if not Y clone will be based on the latest exists snapshot
+		SC_CREATE_SNAPSHOT="N"
+		#BACKUPMODE should be Y if we need to put the PRODUCTION DB in HOT backup mode before taking a snapshot otherwise crash consistent snapshot will be taken
+		BACKUP_MODE="Y"		
+		#SC_PROD_UPDATE_MIRROR should by Y to update mirror from prod to CLONE 
+		SC_PROD_UPDATE_MIRROR="Y"
+		SC_CLONE_PROFILE="TEST"
+		SC_CLONE_CONFIG="prod_rep"
+		#if SC_CLONE_UNMOUNT is Y previous clone will be destroyed prior clone creation 
+		SC_CLONE_UNMOUNT="Y"
+		#if SC_CLONE_CREATE is Y clone will be created  
+		SC_CLONE_CREATE="Y"
+		SC_CLONE_NAME="DEV_"
+		SC_CLONE_SNAPSHOT="*Daily*"
+		SC_CLONE_CLONE_SPLIT="Y"	   
+		;;	
+	TEST) APPHOST1="tlvta3 tlvta4"
+		ENV="TEST"
+		DBHOST1="tlvetdb3 tlvetdb4"
+		APPUSER="apptest"
+		DBUSER="oratest"
+		ENV_DIR="/test"
+		PROCLIST_RED=" ora_smon_TEST"
+		PROCLIST_YELLOW=" tnslsnr listener_tlvetdb3"
+		IPAPPHOST="10.61.228.4:10.61.228.5"
+		IPDBHOST="10.61.248.101:10.61.248.102"
+		VOLLIST="data logout redolog orahome"
+		SC_PROFILE="PROD"
+		SC_CONFIG="prod"
+		SC_POLICY="Daily"		
+		#SC_CREATE_SNAPSHOT should by Y to create snapshot. if not Y clone will be based on the latest exists snapshot
+		SC_CREATE_SNAPSHOT="N"
+		#BACKUPMODE should be Y if we need to put the PRODUCTION DB in HOT backup mode before taking a snapshot otherwise crash consistent snapshot will be taken
+		BACKUP_MODE="Y"		
+		#SC_PROD_UPDATE_MIRROR should by Y to update mirror from prod to CLONE 
+		SC_PROD_UPDATE_MIRROR="Y"
+		SC_CLONE_PROFILE="TEST"
+		SC_CLONE_CONFIG="prod_rep"
+		#if SC_CLONE_UNMOUNT is Y previous clone will be destroyed prior clone creation 
+		SC_CLONE_UNMOUNT="Y"
+		#if SC_CLONE_CREATE is Y clone will be created  
+		SC_CLONE_CREATE="Y"
+		SC_CLONE_NAME="TEST_"
+		SC_CLONE_SNAPSHOT="*Daily*"
+		SC_CLONE_CLONE_SPLIT="Y"
+		;;				
+	PROJ01) APPHOST1="tlvda1"
+		ENV="PROJ01"
+		DBHOST1="tlveddb1"
+		APPUSER="appproj"
+		DBUSER="oraproj"
+		ENV_DIR="/proj"
+		PROCLIST_RED=" ora_smon_PROJ01"
+		PROCLIST_YELLOW=" tnslsnr PROJ01"
+		VOLLIST="data logout redolog orahome"
+		IPAPPHOST="10.61.228.100"
+		IPDBHOST="10.61.228.101"
+		SC_PROFILE="PROD"
+		SC_CONFIG="prod"
+		SC_POLICY="Daily"		
+		#SC_CREATE_SNAPSHOT should by Y to create snapshot. if not Y clone will be based on the latest exists snapshot
+		SC_CREATE_SNAPSHOT="N"
+		#BACKUPMODE should be Y if we need to put the PRODUCTION DB in HOT backup mode before taking a snapshot otherwise crash consistent snapshot will be taken
+		BACKUP_MODE="Y"		
+		#SC_PROD_UPDATE_MIRROR should by Y to update mirror from prod to CLONE 
+		SC_PROD_UPDATE_MIRROR="Y"
+		SC_CLONE_PROFILE="TEST"
+		SC_CLONE_CONFIG="prod_rep"
+		#if SC_CLONE_UNMOUNT is Y previous clone will be destroyed prior clone creation 
+		SC_CLONE_UNMOUNT="Y"
+		#if SC_CLONE_CREATE is Y clone will be created  
+		SC_CLONE_CREATE="Y"
+		SC_CLONE_NAME="PROJ01"
+		SC_CLONE_SNAPSHOT="*Daily*"
+		SC_CLONE_CLONE_SPLIT="Y"
+		;;
+	*) /bin/echo "Please specify existing ENV. "
+		exit
+		;;
 esac
 #DONE
+
+
+
 error_exit ()
 {
    message=$1
-   Subject="auto_clone for $ENVNAME failed"
+   Subject="netapp_clone for $ENVNAME failed"
    for address in `cat /IT_DBA/dba/NETAPPBACKUP/mailaddress.conf` ; do
-       cat $LOGFILE $LOGDIR/$LOGFILE | mail -s "$Subject" $address
+       cat $LOGFILE | mail -s "$Subject" $address
    done
    for phone in `cat /IT_DBA/dba/NETAPPBACKUP/phonenumber.conf`; do
       send_sms $Subject $phone
@@ -88,9 +203,11 @@ error_exit ()
 
    exit
 }
+
+
 OK_exit ()
 {
-  Subject="auto_clone for $ENVNAME success"
+  Subject="netapp_clone for $ENVNAME success"
   for address in `cat /IT_DBA/dba/NETAPPBACKUP/mailaddress.conf` ; do
        mail -s "$Subject" $address <.
   done
@@ -106,6 +223,7 @@ send_sms ()
 }
 ######################################################
 # Processes to check
+######################################################
 
 ARGS=1
 
@@ -147,11 +265,9 @@ fi
 ##################################################################################
 #Usage
 print_usage () {
-/bin/echo "Run auto_clone_test.sh ENV_name DAILY/LAST"
+/bin/echo "Run netapp_clone.sh ENV_name "
 /bin/echo "Notes:"
-/bin/echo "ENV_name is a destination name of ENVNAMEonment"
-/bin/echo "DAILY for create clone from daily snapshot."
-/bin/echo "LAST for make clone from last made snapshot."
+/bin/echo "ENV_name is a destination name of environment"
 /bin/echo ""
 }
 
@@ -160,6 +276,7 @@ print_usage () {
 #####################################################################################
 check_host()
 {
+
   echo "`date` : INFO : Start check Application Host $APPHOST1 " >>   $LOGFILE
 	for HOST in $APPHOST1; do  # for loop and the {} operator
 	    ssh $HOST -l $APPUSER true > /dev/null 2> /dev/null  # ping and discard output
@@ -291,6 +408,8 @@ check_if_mounted()
 
 #########################################################################
 #Function to mount all volumes back
+#########################################################################
+
 mount_all ()
 {
    echo "`date`: Mount all volumes on DB" >> $LOGFILE
@@ -313,16 +432,41 @@ mount_all ()
 		done		
 	done
 }
-###################################################################################
 
-#### Function to make clone  #####################################################
+#########################################################################
+#function to start the db and app following a cold backup 
+#########################################################################
+start_inst ()
+{
+	########      start DB ###################
+	echo "`date`: Sstart database" >>$LOGFILE
+	for HOST in $DBHOST1 ; 	do
+		echo "`date` : COMMAND ssh $HOST -l $DBUSER /IT_DBA/dba/scripts/startdb $ENV" >>$LOGFILE
+		ssh $HOST -l $DBUSER "/IT_DBA/dba/scripts/startdb $ENV" >>$LOGFILE
+	done
+	
+	echo "`date` : sleeping 30 seconds to let the DB go up" >>$LOGFILE
+	sleep 30	
+	
+	########      start DB ###################
+	echo "`date`: Start application" >> $LOGFILE
+	for HOST in $APPHOST1 ;do
+		echo "`date` : COMMAND ssh $HOST -l $APPUSER /IT_DBA/dba/scripts/startapp $ENV" >>$LOGFILE
+		ssh $HOST -l $APPUSER "/IT_DBA/dba/scripts/startapp $ENV" >>$LOGFILE
+	done
+	###################################################################################
+}
+
+#########################################################################
+#### Function to make clone  ############################################
+#########################################################################
 clone ()
 {
 
-	#start hot backup mode if SC_PROD_CREATE_SNAPSHOT="Y"
-	if [ "${SC_PROD_CREATE_SNAPSHOT}" = "Y" ]; then
+	#check if SC_CREATE_SNAPSHOT is Y (need to create snapshot)
+	if [ "${SC_CREATE_SNAPSHOT}" = "Y" ]; then
 	
-		#if backup mode is Y (HOT BACKUP mode) 
+		#if backup mode is HOT (HOT BACKUP mode on the production DB) 
 		if [ "${BACKUP_MODE}" = "Y" ]; then
 			echo "ssh -o BatchMode=yes -o StrictHostKeyChecking=no -T ${SSH_USER}@${SSH_HOST} $BASEDIR/backup_mode.sh START"  >> $LOGFILE 2>&1
 			ssh -o BatchMode=yes -o StrictHostKeyChecking=no -T ${SSH_USER}@${SSH_HOST} $BASEDIR/backup_mode.sh START
@@ -336,12 +480,12 @@ clone ()
 				echo "`date` :  BEGIN HOT BACKUP SUCCESSFULY."  >> $LOGFILE
 			fi
 			REPLICA_ERROR="0"
-		fi		
+		fi
 		
 		#create snapshot
-		echo "`date` : Creating snapshot using SnapCreator Profile:${SC_PROD_PROFILE} Config:${SC_PROD_CONFIG} Policy:${SC_POLICY}" >> $LOGFILE
-		echo "${scBackup} ${SC_PROD_PROFILE} ${SC_PROD_CONFIG} ${SC_POLICY}"  >> $LOGFILE 2>&1	
-		${scBackup} ${SC_PROD_PROFILE} ${SC_PROD_CONFIG} ${SC_POLICY} >> $LOGFILE 2>&1
+		echo "`date` : Creating snapshot using SnapCreator Profile:${SC_PROFILE} Config:${SC_CONFIG} Policy:${SC_POLICY}" >> $LOGFILE
+		echo "${scBackup} ${SC_PROFILE} ${SC_CONFIG} ${SC_POLICY}"  >> $LOGFILE 2>&1	
+		${scBackup} ${SC_PROFILE} ${SC_CONFIG} ${SC_POLICY} >> $LOGFILE 2>&1
 		if [ $? -ne 0 ]; then
 			echo "`date` ERROR : Snapshot backup failed. Look into the log for details." >> $LOGFILE
 			error_list ${res}
@@ -364,6 +508,7 @@ clone ()
 				echo "`date` :  END HOT BACKUP SUCCESSFULY."  >> $LOGFILE
 			fi	
 		fi
+		
 		if [ "${REPLICA_ERROR}" = "1" ]; then 
 			echo "`date` : Snapshot backup creation failed "  >> $LOGFILE
 			error_exit "`date` : ERROR :  Snapshot backup creation failed !"
@@ -373,9 +518,9 @@ clone ()
 	#update mirrror if SC_PROD_UPDATE_MIRROR="Y"
 	if [ "${SC_PROD_UPDATE_MIRROR}" = "Y" ]; then
 		#update mirror
-		echo "`date` : Updating mirror using SnapCreator Profile:${SC_PROD_PROFILE} Config:${SC_PROD_CONFIG}" >> $LOGFILE
-		echo "${scSnapmirror} ${SC_PROD_PROFILE} ${SC_PROD_CONFIG}"  >> $LOGFILE 2>&1	
-		${scSnapmirror} ${SC_PROD_PROFILE} ${SC_PROD_CONFIG} >> $LOGFILE 2>&1
+		echo "`date` : Updating mirror using SnapCreator Profile:${SC_PROFILE} Config:${SC_CONFIG}" >> $LOGFILE
+		echo "${scSnapmirror} ${SC_PROFILE} ${SC_CONFIG}"  >> $LOGFILE 2>&1	
+		${scSnapmirror} ${SC_PROFILE} ${SC_CONFIG} >> $LOGFILE 2>&1
 		if [ $? -ne 0 ]; then
 			echo "`date` ERROR : Session update mirror failed. Look into the log for details." >> $LOGFILE
 			error_list ${res}
@@ -390,10 +535,12 @@ clone ()
 	fi
 	
 	#destroy existing clone if exists 
-
 	if [ "${SC_CLONE_UNMOUNT}" = "Y" ]; then
+		
+		#stopping the current clone instance 
+#---		stop_inst
 		#destroy (umount) clone 
-		echo "`date` : Creating clone using SnapCreator Profile:${SC_CLONE_PROFILE} Config:${SC_CLONE_CONFIG} Clone Name:${SC_CLONE_NAME}" >> $LOGFILE
+		echo "`date` : Un-mounting clone using SnapCreator Profile:${SC_CLONE_PROFILE} Config:${SC_CLONE_CONFIG} Clone Name:${SC_CLONE_NAME}" >> $LOGFILE
 		echo "${scUnmountClone} ${SC_CLONE_PROFILE} ${SC_CLONE_CONFIG} ${SC_CLONE_NAME}"  >> $LOGFILE 2>&1	
 		${scUnmountClone} ${SC_CLONE_PROFILE} ${SC_CLONE_CONFIG} ${SC_CLONE_NAME} >> $LOGFILE 2>&1
 		if [ $? -ne 0 ]; then
@@ -403,8 +550,8 @@ clone ()
 	fi
 
 	
-	#create clone if SC_PROD_UPDATE_MIRROR="Y"
-	if [ "${REPLICA_ERROR}" = "0" ]; then
+	#create clone if SC_CLONE_CREATE="Y"
+	if [ "${SC_CLONE_CREATE}" = "Y" ]; then
 		#create clone 
 		echo "`date` : Creating clone using SnapCreator Profile:${SC_CLONE_PROFILE} Config:${SC_CLONE_SNAPSHOT} Clone Name:${SC_CLONE_NAME} Split:${SC_CLONE_CLONE_SPLIT}" >> $LOGFILE
 		echo "${scClone} ${SC_CLONE_PROFILE} ${SC_CLONE_CONFIG} ${SC_CLONE_SNAPSHOT} ${SC_CLONE_NAME} ${IPDBHOST}:${IPAPPHOST} ${SC_CLONE_CLONE_SPLIT}"  >> $LOGFILE 2>&1	
@@ -420,11 +567,17 @@ clone ()
 		else
 			echo "`date` : Create clone finished SUCCESSFULY"  >> $LOGFILE
 		fi		
+		#mount file systems 
+#---	mount_all
+		######### Check if all mounted after create ENVNAMEOMENT ########################################################################
+#---	check_if_mounted		
+		######## oracle will be started by another script 
 	fi	
 }
 
-
-############### M A I N #######################
+#########################################################################
+###############                   M A I N         #######################
+#########################################################################
 # Test number of arguments to script (always a good idea).
 if [ $# -ne $ARGS ]; then
    print_usage
@@ -432,34 +585,35 @@ if [ $# -ne $ARGS ]; then
 fi
 
 ########## Check if host can be reachable by SSH #########################################################
-#--check_host
+#---check_host
 
 ########## Create clone : ##############################################################################
 /bin/echo "Running clone " >>$LOGFILE 
-#--stop_inst
+
+####################################################################
+#### Create backup and clones according to the configuration       #
+####################################################################
+
 clone
 
-##########  Mount new volumes #########################################################################
-#--mount_all
-######### Check if all mounted after create ENVNAMEOMENT ########################################################################
-#--check_if_mounted
-
 #######################################################################################################
-# Get clone profile snapshot times
+# Get profile snapshot times
 #######################################################################################################
 SNAPS="*${SC_POLICY}*"
 echo "`date` : Listing snapshot using SnapCreator Profile:${SC_CLONE_PROFILE} Config:${SC_CLONE_CONFIG} Snapshot:${SNAPS}" >> $LOGFILE
-echo "${scSnapshot} ${SC_CLONE_PROFILE} ${SC_CLONE_CONFIG} ${SNAPS}"  >> $LOGFILE 2>&1	
-${scSnapshot} ${SC_CLONE_PROFILE} ${SC_CLONE_CONFIG} ${SNAPS} >> $LOGFILE 2>&1
+echo "${scSnapshot} ${SCE_PROFILE} ${SC_CONFIG} ${SNAPS}"  >> $LOGFILE 2>&1	
+${scSnapshot} ${SC_PROFILE} ${SC_CONFIG} ${SNAPS} >> $LOGFILE 2>&1
 #######################################################################################################################################################
 
 
 #######################################################################################################
 # Listing all clones on the system
 #######################################################################################################
-echo "`date` : Listing clones using SnapCreator Profile:${SC_CLONE_PROFILE} Config:${SC_CLONE_CONFIG}" >> $LOGFILE
-echo "${scListClones} ${SC_CLONE_PROFILE} ${SC_CLONE_CONFIG}"  >> $LOGFILE 2>&1	
-res=`${scListClones} ${SC_CLONE_PROFILE} ${SC_CLONE_CONFIG} >> $LOGFILE 2>&1`
+if [ "${SC_CLONE_CREATE}" = "Y" ]; then
+	echo "`date` : Listing clones using SnapCreator Profile:${SC_CLONE_PROFILE} Config:${SC_CLONE_CONFIG}" >> $LOGFILE
+	echo "${scListClones} ${SC_CLONE_PROFILE} ${SC_CLONE_CONFIG}"  >> $LOGFILE 2>&1	
+	res=`${scListClones} ${SC_CLONE_PROFILE} ${SC_CLONE_CONFIG} >> $LOGFILE 2>&1`
+fi
 #######################################################################################################################################################
 
 /bin/echo "Clone finished." >> $LOGFILE
