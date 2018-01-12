@@ -49,7 +49,7 @@ while ($notcompleted) {
 		if ($svm -and $_.Storage -ne $svm) {
 			Write-Log "ERROR: only one SVM is supported for cloning (in the configuration there is at least 2: $($svm) and $($_.Storage)"
 			$host.SetShouldExit(1) 
-			exit		
+			exit 1		
 		}
 		
 		$svm = $_.Storage 
@@ -78,7 +78,7 @@ while ($notcompleted) {
 					if (-not $conn1) {
 						Write-Log "ERROR: cannot connect to destination SVM: $destsvm"
 						$host.SetShouldExit(1) 
-						exit
+						exit 1
 					}
 					$connhash.Add($destsvm,$conn1)
 				}
@@ -101,7 +101,7 @@ while ($notcompleted) {
 						if ($sm.MirrorState -ne "snapmirrored") {
 							Write-Log "ERROR: $($destsvm):$($destvol) is not in mirrored state"
 							$host.SetShouldExit(1) 
-							exit						
+							exit 1						
 						} elseif ($sm.Status -eq "transferring") {
 							Write-Log "$($svm):$($vol) -> $($destsvm):$($destvol) - earlier transfer running, waiting for it to complete"
 							$notcompleted = $true
