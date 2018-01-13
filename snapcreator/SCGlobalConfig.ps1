@@ -54,7 +54,7 @@ if (!$sc -or $na) {
 	}
 	try
 	{
-		$requiredVersion = New-Object System.Version(3.1)
+		$requiredVersion = New-Object System.Version(4.1)
 		if ((Get-NaToolkitVersion).CompareTo($requiredVersion) -lt 0) { 
 			throw
 		}
@@ -89,8 +89,8 @@ if ($sc) {
 		}
 	}	
 	
-	$secstr = Get-Content $passwordfile | ConvertTo-SecureString 
-	$sccred = new-object -typename System.Management.Automation.PSCredential -argumentlist $scusername, $secstr
+	$secstrsc = Get-Content $passwordfile | ConvertTo-SecureString 
+	$sccred = new-object -typename System.Management.Automation.PSCredential -argumentlist $scusername, $secstrsc
 	
 	$module = Get-Module SnapCreator
 	if (!$module) {
