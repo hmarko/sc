@@ -129,6 +129,7 @@ $vols | Foreach-Object {
 								}
 							}
 						}
+						Write-Log "clone:$($currvol) is based on a snapshot which been taken $($span.Hours)h ago, which is more than the allowed maximum of $($MaxCloneAgeHours)h"
 						Write-Log "destination aggr for clone split is $destaggr"
 						if ($currvol.Aggregate -eq $destaggr -or !$destaggr) {
 							Write-Log "start split of $currvol from parent volume"
