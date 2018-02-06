@@ -68,9 +68,7 @@ $vols | Foreach-Object {
 	
 	$clonedetails = Get-NcVol -Controller $conn -Name $fullclonename
 	if (!$clonedetails) {
-		Write-Log "ERROR:could not locate clone volume $($svm):$($fullclonename)"
-		$host.SetShouldExit(1) 
-		exit 1
+		Write-Log "Warning:could not locate clone volume $($svm):$($fullclonename)"
 	}
 
 	$volcomment = $clonedetails.VolumeIdAttributes.Comment
