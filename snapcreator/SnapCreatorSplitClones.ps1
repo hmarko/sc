@@ -31,7 +31,7 @@ if (!([System.IO.File]::Exists($GlobalFile))) {
 
 $clustercred = New-Object -typename System.Management.Automation.PSCredential -argumentlist $clusteruser, $secstr	
 Write-Log "connecting to cluster $clustername"
-$clusterconn = Connect-NcController -Name cluster1 -Credential $clustercred -HTTPS
+$clusterconn = Connect-NcController -Name $cluster -Credential $clustercred -HTTPS
 
 Write-Log "connecting to snapcreator server $scserver"
 $snapcreator = Connect-ScServer -Name $scserver -Port $scport -Credential $sccred
