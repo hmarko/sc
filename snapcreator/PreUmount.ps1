@@ -12,6 +12,12 @@ $usersnap = $Env:USER_SNAP_NAME
 $user_clone_name = $Env:USER_CLONE_NAME
 $clone_prefix = $Env:CLONEPREFIXNAME
 
+#get the hosting clusert name and username from golbal config
+$cmode_cluster_users = $env:CMODE_CLUSTER_USERS
+$clustername = ((($cmode_cluster_users.Split("/"))[0]).Split(":"))[0]
+$clusteruser = ((($cmode_cluster_users.Split("/"))[0]).Split(":"))[1]
+$clustercred = New-Object -typename System.Management.Automation.PSCredential -argumentlist $clusteruser, $secstr
+
 if (!$volumes) {
 	exit_with_error "Error: environment variable VOLUMES was not found, this script must run as part of snapcreator job"
 }
@@ -81,6 +87,16 @@ $volspersvm | ForEach {
 				$abort = Stop-NcVolCloneSplit -Name $vol.Name
 				sleep 2
 			}
+			
+			$clusterconn = Connect-NcController -Name  $clustername -Credential $clustercred
+			$issplit = Get-NcVolMove -Vserver $svm -Controller $clusterconn | ? {$_.Volume -eq $vol.Name -and $_.State -ne 'done'}
+			if ($issplit) {
+				Write-Log "aborting vol move for: $($vol.Name)"
+				$abort = Stop-NcVolMove -Name $vol.Name -Vserver $svm -Controller $clusterconn
+				sleep 10
+			}
+			
+			
 			$v = Rename-NcVol -Name $vol.Name -NewName $origname -Controller $conn
 		} else {
 			#snapcreate doesn't delete volumes which are not clones
